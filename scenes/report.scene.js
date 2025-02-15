@@ -230,7 +230,7 @@ reportScene.action(["downloadPdf"], async (ctx) => {
         const projects = await getProjects();
 
         const pdfFileBuffer = Buffer.from(
-            createTransactionsPDF(transactionsInPeriod, users, period, projects, ctx)
+            await createTransactionsPDF(transactionsInPeriod, users, period, projects, ctx)
         );
 
         const countOfProjects = await countProjectsWithPermissions(ctx.session.user.id);
