@@ -6,7 +6,7 @@
 
 start-scene-name = Старт
 
-income-scene-name = Создание дохода
+income-scene-name = Создание прихода
 
 outcome-scene-name = Создание расхода
 
@@ -18,8 +18,6 @@ telegram-id = Ваш telegram_id: { $id }
 
 welcome = Добро пожаловать в проект!
 
-admin-project-name = Администрирование
-
 welcome-to-project = Вы в проекте "{ $name }"
 
 input-action = Выберите действие ниже:
@@ -28,7 +26,7 @@ input-action = Выберите действие ниже:
 
 transaction-summary = <b>Создание {
     $type ->
-    [in] дохода
+    [in] прихода
     *[out] расхода
 } :</b>{"\u000A"}{"\u000A"}——————————————{"\u000A"}Сумма: <b>{ $amountString } { $currency }</b>{"\u000A"}
                 { $cryptoTransactionString }Комментарий: "{ $comment }"
@@ -41,7 +39,7 @@ input-period = Выберите период:
 
 input-report-type = Выберите удобную форму представления.
 
-input-report-type-with-filter = Активные фильтры:{"\u000A"}{ $currency }{"\u000A"}{ $user }{"\u000A"}{ $type }{"\u000A"}Выберите удобную форму представления.
+input-report-type-with-filter = Активные фильтры:{"\u000A"}{ $type }{"\u000A"}Выберите удобную форму представления.
 
 input-beginning-date = Выберите дату начала:
 
@@ -82,7 +80,7 @@ comment-header = Комментарий
 
 all-transactions-header = Все транзакции
 
-incomes-list-header = Доходы
+incomes-list-header = Приходы
 
 outcomes-list-header = Расходы
 
@@ -90,9 +88,7 @@ hash-header = Хеш
 
 ## Компоновщики
 
-balance = Общий баланс
-
-user-zero-balance = нулевой по всем валютам
+balance = Баланс
 
 main-zero-balance = В настоящее время нулевой.
 
@@ -115,7 +111,7 @@ write-all-amount-data = Введите сумму в формате {
 input-crypto = Введите ссылку на транзакцию из TRONSCAN/ETHERSCAN/BSCSCAN, например:
                 https://tronscan.org/#/transaction/3194a00c5cf427a931b908453588b2ca3f661dafa3860b76a6362d08b3b08583
 
-input-comment = Введите комментарий (не менее 10 символов):
+input-comment = Введите комментарий:
 
 ## Ошибки
 
@@ -156,13 +152,13 @@ open-project-button = { open-button } {
     *[other] проект
 }
 
-balance-button = Общий баланс
+balance-button = Баланс
 
-income-button = Доход
+income-button = Приход
 
 outcome-button = Расход
 
-report-button = Отчёт
+report-button = Выписка
 
 exit-button = Выход
 
@@ -171,10 +167,6 @@ confirm-button = Подтвердить
 cancel-button = Отмена
 
 back-button = Назад
-
-in-type-button = Приход
-
-out-type-button = Расход
 
 next-button = Далее
 
@@ -194,7 +186,7 @@ week-button = Неделя
 
 month-button = Месяц
 
-custom-period-button = Произвольный период
+custom-period-button = Свой
 
 january-button = Январь
 
@@ -225,9 +217,5 @@ day-button = { $day } день
 pdf-button = PDF
 
 excel-button = Excel
-
-add-currency-filter-button = Фильтр [Валюта]
-
-add-person-filter-button = Фильтр [Пользователь]
 
 add-type-filter-button = Фильтр [Тип]
