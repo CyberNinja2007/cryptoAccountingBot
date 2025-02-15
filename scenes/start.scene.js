@@ -47,10 +47,6 @@ const startScene = new Scenes.WizardScene("startScene", async (ctx) => {
 
                         await handleMainMenu(ctx, ctx.t("input-action"));
 
-                        await ctx.answerCbQuery(ctx.t("welcome-to-project", {
-                            name: ctx.session.project.name
-                        }));
-
                         return ctx.scene.leave();
                     }
 
