@@ -56,7 +56,7 @@ reportScene.action(
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true, true, true)
+                downloadFilterOptionKeyboard(ctx, true)
             );
 
             await ctx.answerCbQuery('');
@@ -119,7 +119,7 @@ reportScene.action(/^[0-9]* число$/i, async (ctx) => {
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true, true, true)
+                downloadFilterOptionKeyboard(ctx, true)
             );
         } else {
             ctx.wizard.state.startDay = pickedDay;
@@ -139,99 +139,6 @@ reportScene.action(/^[0-9]* число$/i, async (ctx) => {
         await ctx.answerCbQuery('');
 
         return ctx.wizard.next();
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action("applyCurrencyFilter", async (ctx) => {
-    try {
-        ctx.editMessageText(ctx.t("input-currency"), currencyInlineKeyboard(ctx, ctx.session.availableCurrencies));
-
-        await ctx.answerCbQuery('');
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action(/^((([A-Z]{1}[a-z]+)|([A-Z]+)) \([$€£₺₮C₽]{1}\))$/i, async (ctx) => {
-    try {
-        const currency = ctx.match.input;
-        ctx.wizard.state.currency_filter = currency;
-        const user = ctx.wizard.state.user_filter || {name: ""};
-        const type = ctx.wizard.state.type_filter || "";
-
-        await ctx.editMessageText(
-            ctx.t("input-report-type-with-filter", {
-                currency,
-                user: user.name,
-                type: type !== "" ? TRANSACTION_TYPES[type] : type
-            }),
-            user.name !== "" && type !== "" ?
-                downloadOptionKeyboard(ctx) :
-                downloadFilterOptionKeyboard(ctx, false, user.name === "", type === "")
-        );
-
-        await ctx.answerCbQuery('');
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action("applyPersonFilter", async (ctx) => {
-    try {
-        const project = ctx.session.project;
-        let users = await getUsers();
-        ctx.wizard.state.users = users;
-        const isAllowed = await Promise.all(
-            users.map(async user => await checkIfUserOperator(user.id, project.id)));
-
-        users = users.filter(
-            (user, index) => {
-                return isAllowed[index] && user.status !== "off" && user.status !== "operator"
-            }
-        );
-
-        ctx.editMessageText(ctx.t("input-users-below"), await inlineUsersKeyboard(ctx, users));
-
-        await ctx.answerCbQuery('');
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action(/^user#[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/i, async (ctx) => {
-    try {
-        const userId = ctx.match.input.split("#")[1];
-        const user = ctx.wizard.state.users.find(u => u.id === userId);
-
-        if (!user)
-            throw "Пользователя выбранного в фильтре не существует";
-
-        ctx.wizard.state.user_filter = user;
-        const currency = ctx.wizard.state.currency_filter || "";
-        const type = ctx.wizard.state.type_filter || "";
-
-        await ctx.editMessageText(
-            ctx.t("input-report-type-with-filter", {
-                currency,
-                user: user.name,
-                type: type !== "" ? TRANSACTION_TYPES[type] : type
-            }),
-            currency !== "" && type !== "" ?
-                downloadOptionKeyboard(ctx) :
-                downloadFilterOptionKeyboard(ctx, currency === "", false, type === "")
-        );
-
-        await ctx.answerCbQuery('');
     } catch (e) {
         await ctx.answerCbQuery('');
 
@@ -266,7 +173,7 @@ reportScene.action(/^type_[a-z]+$/i, async (ctx) => {
             }),
             user.name !== "" && currency !== "" ?
                 downloadOptionKeyboard(ctx) :
-                downloadFilterOptionKeyboard(ctx, currency === "", user.name === "", false)
+                downloadFilterOptionKeyboard(ctx,  false)
         );
 
         await ctx.answerCbQuery('');
@@ -302,8 +209,6 @@ reportScene.action(["downloadPdf"], async (ctx) => {
     try {
         await ctx.answerCbQuery('');
 
-        const currency = ctx.wizard.state.currency_filter;
-        const user = ctx.wizard.state.user_filter;
         const type = ctx.wizard.state.type_filter;
         const [startDate, endDate] = formatDates(ctx);
         const startDateText = startDate.toLocaleDateString("ru");
@@ -317,20 +222,10 @@ reportScene.action(["downloadPdf"], async (ctx) => {
             ctx.session.project.id
         );
 
-        if (currency) {
-            transactionsInPeriod = transactionsInPeriod.filter(
-                (transaction) => transaction.currency === currency
-            );
-        }
-
         const isAllowed = await checkUserPermission(ctx.session.user.id, ctx.session.project.id, permissionsEnum["getAllInfo"]);
 
         if (!isAllowed) {
             transactionsInPeriod = transactionsInPeriod.filter(t => t.user_id === ctx.session.user.id);
-        }
-
-        if (user) {
-            transactionsInPeriod = transactionsInPeriod.filter(t => t.user_id === ctx.wizard.state.user_filter.id);
         }
 
         if (type) {
@@ -373,8 +268,6 @@ reportScene.action(["downloadXlsx"], async (ctx) => {
     try {
         await ctx.answerCbQuery('');
 
-        const user = ctx.wizard.state.user_filter;
-        const currency = ctx.wizard.state.currency_filter;
         const type = ctx.wizard.state.type_filter;
         const [startDate, endDate] = formatDates(ctx);
         const startDateText = startDate.toLocaleDateString("ru");
@@ -394,20 +287,10 @@ reportScene.action(["downloadXlsx"], async (ctx) => {
             ctx.session.project.id
         );
 
-        if (currency) {
-            periodTransactions = periodTransactions.filter(
-                (transaction) => transaction.currency === currency
-            );
-        }
-
         const isAllowed = await checkUserPermission(ctx.session.user.id, ctx.session.project.id, permissionsEnum["getAllInfo"]);
 
         if (!isAllowed) {
             periodTransactions = periodTransactions.filter(t => t.user_id === ctx.session.user.id);
-        }
-
-        if (user) {
-            periodTransactions = periodTransactions.filter(t => t.user_id === ctx.wizard.state.user_filter.id);
         }
 
         if (type) {

@@ -271,7 +271,7 @@ export const downloadOptionKeyboard = (ctx, isPdfNeeded = true, isExcelNeeded = 
 /**
  * Генерирует клавиатуру для выбора вариантов загрузки.
  */
-export const downloadFilterOptionKeyboard = (ctx, currencyFilterNeeded, userFilterNeeded, typeFilterNeeded,
+export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded,
                                              isPdfNeeded = true, isExcelNeeded = true) => {
     let keyboard = [[]];
 
@@ -283,15 +283,6 @@ export const downloadFilterOptionKeyboard = (ctx, currencyFilterNeeded, userFilt
         keyboard[1] ?
             keyboard[1].push(Markup.button.callback(ctx.t("excel-button"), "downloadXlsx")) :
             keyboard.push([Markup.button.callback(ctx.t("excel-button"), "downloadXlsx")]);
-    }
-
-    if (currencyFilterNeeded) {
-        keyboard.push([Markup.button.callback(ctx.t("add-currency-filter-button"), "applyCurrencyFilter")]);
-    }
-
-    if (userFilterNeeded) {
-        keyboard.length > 2 ? keyboard.at(-1).push(Markup.button.callback(ctx.t("add-person-filter-button"), "applyPersonFilter"))
-            : keyboard.push([Markup.button.callback(ctx.t("add-person-filter-button"), "applyPersonFilter")]);
     }
 
     if (typeFilterNeeded) {
