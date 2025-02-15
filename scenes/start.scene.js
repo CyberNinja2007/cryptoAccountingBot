@@ -40,6 +40,20 @@ const startScene = new Scenes.WizardScene("startScene", async (ctx) => {
                     const userProjects = ctx.session.user.status === "admin" ? [...projects, new Project(0, ctx.t("admin-project-name"), "admin")] :
                         projects.filter((project, index) => isAllowed[index]);
 
+                    if (userProjects.length === 1){
+                        ctx.session.project = userProjects[0];
+
+                        ctx.session.availableCurrencies = await getProjectCurrencies(userProjects[0].id);
+
+                        await handleMainMenu(ctx, ctx.t("input-action"));
+
+                        await ctx.answerCbQuery(ctx.t("welcome-to-project", {
+                            name: ctx.session.project.name
+                        }));
+
+                        return ctx.scene.leave();
+                    }
+
                     if (userProjects.length > 0) {
                         ctx.session.userProjects = userProjects;
 
