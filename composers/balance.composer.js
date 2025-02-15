@@ -32,19 +32,19 @@ composer.use(filter("balance-button", async (ctx) => {
             throw "Контрольная точка не была создана";
         }
 
-        const calculatedBalances = calculateAndFormatBalances(balances, currencies);
-
-        const calculatedBalancesLengths = Object.values(calculatedBalances).map(b => b.length);
-
-        const balancesMaxLength = Math.max(...calculatedBalancesLengths);
-
-        const kassBalance = Object.values(balances).reduce((mainSum, balance) => {
-            return mainSum += balance;
-        }, 0);
-
-        if (kassBalance === 0) {
+        if(Object.keys(balances).length === 0){
             mainText.splice(0, 1, `<b>${ctx.t("main-zero-balance")}`);
         } else {
+            const calculatedBalances = calculateAndFormatBalances(balances, currencies);
+
+            const calculatedBalancesLengths = Object.values(calculatedBalances).map(b => b.length);
+
+            const balancesMaxLength = Math.max(...calculatedBalancesLengths);
+
+            const kassBalance = Object.values(balances).reduce((mainSum, balance) => {
+                return mainSum += balance;
+            }, 0);
+
             for (let i = 0; i < currencies.length; i += 2) {
                 if (i + 1 < currencies.length) {
                     if(mainText.length === 1)
