@@ -32,7 +32,9 @@ composer.use(filter("balance-button", async (ctx) => {
             throw "Контрольная точка не была создана";
         }
 
-        if(Object.keys(balances).length === 0){
+        const mainBalance = Object.keys(balances).reduce((acc, cur) => {acc += balances[cur]; return acc; }, 0);
+
+        if(mainBalance === 0) {
             mainText.splice(0, 1, `<b>${ctx.t("main-zero-balance")}`);
         } else {
             const calculatedBalances = calculateAndFormatBalances(balances, currencies);
