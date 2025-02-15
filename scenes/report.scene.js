@@ -162,18 +162,12 @@ reportScene.action(/^type_[a-z]+$/i, async (ctx) => {
     try {
         const type = ctx.match.input.split("_")[1];
         ctx.wizard.state.type_filter = type;
-        const user = ctx.wizard.state.user_filter || {name: ""};
-        const currency = ctx.wizard.state.currency_filter || "";
 
         await ctx.editMessageText(
             ctx.t("input-report-type-with-filter", {
-                currency: currency,
-                user: user.name,
                 type: TRANSACTION_TYPES[type]
             }),
-            user.name !== "" && currency !== "" ?
-                downloadOptionKeyboard(ctx) :
-                downloadFilterOptionKeyboard(ctx,  false)
+            downloadFilterOptionKeyboard(ctx,  false)
         );
 
         await ctx.answerCbQuery('');
