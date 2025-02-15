@@ -23,6 +23,7 @@ import {createControlPoint} from '../utils/eventCreator.js';
 import {filter} from "../utils/filterCommandMessages.js";
 import {pool} from "../db/db.js";
 import {generateLinkForCryptoTransaction} from "../utils/cryptoTransactionsManager.js";
+import {createCryptoTransaction} from "../db/controllers/CryptoTransactionController.js";
 
 const createTransactionScene = new Scenes.WizardScene(
     "createTransactionScene",
@@ -53,12 +54,17 @@ const createTransactionScene = new Scenes.WizardScene(
             const amount = ctx.wizard.state.amount;
             const amountString = amount.toLocaleString("de", {maximumFractionDigits: 2});
             const comment = ctx.wizard.state.comment;
-            const cryptoTransaction = ctx.wizard.state.cryptoTransaction;
+            const cryptoTransactions = ctx.wizard.state.cryptoTransactions;
 
-            const linkToInfo = generateLinkForCryptoTransaction(cryptoTransaction.type, cryptoTransaction.hash);
+            let cryptoTransactionString = ctx.t("crypto-transactions");
 
-            const cryptoTransactionString =
-                `<a href="${linkToInfo}">${cryptoTransaction.amount.toLocaleString("de", {maximumFractionDigits: 2})} ${cryptoTransaction.token}</a>\n`
+            if (cryptoTransactions) {
+                cryptoTransactions.forEach((cryptoTransaction, index) => {
+                    const linkToInfo = generateLinkForCryptoTransaction(cryptoTransaction.type, cryptoTransaction.hash);
+                    cryptoTransactionString += `${index + 1}. <a href="${linkToInfo}">${cryptoTransaction.amount.toLocaleString("de", {maximumFractionDigits: 2})} ${cryptoTransaction.token}</a>\n`
+                })
+                cryptoTransactionString += "\n";
+            }
 
             const confirmMessage = ctx.t("transaction-summary", {
                 type,
@@ -89,7 +95,7 @@ createTransactionScene.action("confirm_income", async (ctx) => {
     const currency = ctx.wizard.state.currency;
     const amount = ctx.wizard.state.amount;
     const comment = ctx.wizard.state.comment;
-    const cryptoTransaction = ctx.wizard.state.cryptoTransaction;
+    const cryptoTransactions = ctx.wizard.state.cryptoTransactions;
 
     const client = await pool.connect();
 
@@ -111,8 +117,8 @@ createTransactionScene.action("confirm_income", async (ctx) => {
             comment,
             amount,
             project_id,
-            cryptoTransaction.hash,
-            cryptoTransaction.type
+            cryptoTransactions[0].hash,
+            cryptoTransactions[0].type
         );
 
         if (!transaction) {
@@ -131,14 +137,38 @@ createTransactionScene.action("confirm_income", async (ctx) => {
             throw "Не удалось создать событие создания транзакции";
         }
 
+        for (const cryptoTransaction of cryptoTransactions) {
+            const createdCryptoTransaction =
+                await createCryptoTransaction(client, cryptoTransaction.amount, cryptoTransaction.token, cryptoTransaction.hash);
+
+            if (!createdCryptoTransaction) {
+                throw "Крипто-транзакция не была успешно создана";
+            }
+
+            const createCryptoTransactionEvent = await createEvent(
+                client,
+                "create",
+                createdCryptoTransaction.id,
+                createdCryptoTransaction,
+                "cryptoTransaction"
+            );
+
+            if (!createCryptoTransactionEvent) {
+                throw "Не удалось создать событие создания крипто-транзакции";
+            }
+        }
+
         await client.query('COMMIT');
+        client.release();
     } catch (error) {
         await client.query('ROLLBACK');
+        client.release();
+
         await ctx.answerCbQuery('');
 
         await handleError(ctx, error);
-    } finally {
-        client.release();
+
+        return ctx.scene.leave();
     }
 
     await handleMainMenu(ctx, ctx.t("success"));

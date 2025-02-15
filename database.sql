@@ -81,3 +81,12 @@ CREATE TABLE public.logs (
                              object_type text NOT NULL,
                              CONSTRAINT logs_pk PRIMARY KEY (event_id)
 );
+
+CREATE TABLE public.crypto_transactions (
+                                     crypto_transaction_id uuid NOT NULL DEFAULT gen_random_uuid(),
+                                     hash text NULL,
+                                     amount numeric(19, 9) NOT NULL,
+                                     token text NOT NULL,
+                                     created timestamp with time zone NOT NULL DEFAULT (now() AT TIME ZONE 'utc'::text),
+                                     CONSTRAINT crypto_transactions_pk PRIMARY KEY (crypto_transaction_id)
+);

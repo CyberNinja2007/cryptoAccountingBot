@@ -151,9 +151,9 @@ export const handleCryptoOption = async (ctx) => {
         const transactionData = await getInfoAboutTransactionByHash(cryptoTransactionsHash, cryptoTransactionsType);
 
         if (transactionData.length === 0)
-            throw new Error(`Возникла ошибка при получении данных о транзакции ${hash}`);
+            throw new Error(`Возникла ошибка при получении данных о транзакции ${cryptoTransactionsHash}`);
 
-        ctx.wizard.state.cryptoTransaction = transactionData[0];
+        ctx.wizard.state.cryptoTransactions = transactionData;
 
         ctx.wizard.cursor++;
         return ctx.wizard.steps[ctx.wizard.cursor](ctx);

@@ -24,6 +24,8 @@ input-action = Выберите действие ниже:
 
 ## Транзакции
 
+crypto-transactions = <b>Крипто-транзакции:</b>{"\u000A"}
+
 transaction-summary = <b>Создание {
     $type ->
     [in] прихода

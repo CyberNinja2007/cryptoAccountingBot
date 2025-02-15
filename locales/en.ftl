@@ -26,6 +26,8 @@ input-action = Choose an action below:
 
 ## Transactions
 
+crypto-transactions = <b>Crypto-transactions:</b>{"\u000A"}
+
 transaction-summary = <b>Creating {
     $type ->
     [in] income
