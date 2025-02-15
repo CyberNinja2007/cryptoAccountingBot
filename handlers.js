@@ -58,7 +58,7 @@ export const handleMaxAmount = async (ctx) => {
     try{
         if (ctx.wizard.state.type !== "in") {
             const currency = ctx.wizard.state.currency.name;
-            const transactions = await getTransactions(ctx.session.project.id, ctx.session.user.id);
+            const transactions = await getTransactions(ctx.session.project.id);
             const balance = calcBalance(transactions);
 
             if (balance[currency] === undefined || balance[currency] === 0 || balance[currency] === null) {
