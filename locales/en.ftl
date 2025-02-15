@@ -41,7 +41,7 @@ input-period = Choose a period:
 
 input-report-type = Choose a convenient form of representation.
 
-input-report-type-with-filter = Active filters:{"\u000A"}{ $currency }{"\u000A"}{ $user }{"\u000A"}{ $type }{"\u000A"}Choose a convenient form of representation.
+input-report-type-with-filter = Active filters:{ $type }{"\u000A"}Choose a convenient form of representation.
 
 input-beginning-date = Choose start date:
 
@@ -88,6 +88,8 @@ outcomes-list-header = Expences
 
 hash-header = Hash
 
+check-header = Check
+
 ## Composers
 
 balance = Total balance
@@ -115,7 +117,7 @@ write-all-amount-data = Enter the amount in format {
 input-crypto = Enter the link to transaction from TRONSCAN/ETHERSCAN/BSCSCAN, for example:
                 https://tronscan.org/#/transaction/3194a00c5cf427a931b908453588b2ca3f661dafa3860b76a6362d08b3b08583
 
-input-comment = Enter a comment (more than 10 characters):
+input-comment = Enter a comment:
 
 ## Errors
 
@@ -133,8 +135,6 @@ currency-not-enough-money-error = There are no available funds in this currency.
 
 input-error-amount = { input-error } amount.
 
-comment-error = The comment must be at least 10 characters long.
-
 comment-empty-error = The comment cannot be empty.
 
 input-error-empty = No fields should be empty.
@@ -143,7 +143,7 @@ input-error-project = The chosen project does not exist!
 
 not-enough-rights-error = Sorry, you don't have enough rights for that
 
-main-balance-error = An error occurred while processing the main balance, please try again later.
+main-balance-error = An error occurred while processing the balance, please try again later.
 
 ## Keyboard buttons
 
@@ -156,7 +156,7 @@ open-project-button = { open-button } {
     *[other] the project
 }
 
-balance-button = Total balance
+balance-button = Balance
 
 income-button = Income
 
@@ -171,10 +171,6 @@ confirm-button = Confirm
 cancel-button = Cancel
 
 back-button = Back
-
-in-type-button = Receive
-
-out-type-button = Issue
 
 next-button = Next
 
@@ -194,7 +190,7 @@ week-button = Week
 
 month-button = Month
 
-custom-period-button = Custom period
+custom-period-button = Custom
 
 january-button = January
 
@@ -225,9 +221,5 @@ day-button = { $day } day
 pdf-button = PDF
 
 excel-button = Excel
-
-add-currency-filter-button = Filter [Currency]
-
-add-person-filter-button = Filter [Person]
 
 add-type-filter-button = Filter [Type]

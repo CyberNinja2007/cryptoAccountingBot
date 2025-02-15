@@ -86,6 +86,8 @@ outcomes-list-header = Расходы
 
 hash-header = Хеш
 
+check-header = Check
+
 ## Компоновщики
 
 balance = Баланс
@@ -128,8 +130,6 @@ input-error-currency = { input-error } данные валюты.
 currency-not-enough-money-error = Недостаточно средств в этой валюте.
 
 input-error-amount = { input-error } сумму.
-
-comment-error = Комментарий должен содержать не менее 10 символов.
 
 comment-empty-error = Комментарий не может быть пустым.
 
