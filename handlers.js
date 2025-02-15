@@ -181,15 +181,7 @@ export const handleAskComment = async (ctx) => {
  */
 export const handleCommentOption = async (ctx) => {
     try {
-        const comment = ctx.wizard.state.comment || ctx.message.text;
-
-        if (comment.length < 10) {
-            ctx.reply(ctx.t("comment-error"));
-            ctx.wizard.cursor--;
-            return ctx.wizard.steps[ctx.wizard.cursor](ctx);
-        }
-
-        ctx.wizard.state.comment = comment;
+        ctx.wizard.state.comment = ctx.wizard.state.comment || ctx.message.text;
 
         ctx.wizard.cursor++;
         return ctx.wizard.steps[ctx.wizard.cursor](ctx);
