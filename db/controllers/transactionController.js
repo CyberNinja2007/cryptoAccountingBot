@@ -66,8 +66,8 @@ export async function getTransactionsBetween(start, end, projectId) {
  * @param {string} comment - Комментарий к транзакции.
  * @param {number} amount - Сумма транзакции.
  * @param {string} projectId - Идентификатор проекта отправителя.
- * @param {number} hash - Хэш крипто-транзакции.
- * @param {number} cryptoType - Тип крипто-транзакции.
+ * @param {string} hash - Хэш крипто-транзакции.
+ * @param {string} cryptoType - Тип крипто-транзакции.
  * @returns {Promise<Transaction | null>} Созданная транзакция, или null в случае ошибки.
  */
 export async function createTransaction(client, userId, accountId, type, currency,
