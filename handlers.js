@@ -62,8 +62,14 @@ export const handleMaxAmount = async (ctx) => {
             const balance = calcBalance(transactions);
 
             if (balance[currency] === undefined || balance[currency] === 0 || balance[currency] === null) {
-                ctx.reply(ctx.t("currency-not-enough-money-error"));
                 ctx.wizard.state.currency = undefined;
+
+                if(ctx.session.availableCurrencies.length === 1){
+                    await handleMainMenu(ctx, ctx.t("currency-not-enough-money-error"));
+                    return ctx.scene.leave();
+                }
+
+                ctx.reply(ctx.t("currency-not-enough-money-error"));
 
                 ctx.wizard.cursor--;
                 return ctx.wizard.steps[ctx.wizard.cursor](ctx);
