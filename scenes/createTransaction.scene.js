@@ -25,6 +25,8 @@ import {pool} from "../db/db.js";
 import {generateLinkForCryptoTransaction} from "../utils/cryptoTransactionsManager.js";
 import {createCryptoTransaction} from "../db/controllers/CryptoTransactionController.js";
 
+const COMMISSION_AMOUNT = 3;
+
 const createTransactionScene = new Scenes.WizardScene(
     "createTransactionScene",
     async (ctx) => {
@@ -155,6 +157,39 @@ createTransactionScene.action("confirm_income", async (ctx) => {
 
             if (!createCryptoTransactionEvent) {
                 throw "Не удалось создать событие создания крипто-транзакции";
+            }
+        }
+
+        if(type === "out"){
+            const commissionText = `Оплата комиссии kwex для транзакции #${transaction.id}`
+
+            const commission = await createTransaction(
+                client,
+                user_id,
+                account_id,
+                type,
+                currency.id,
+                commissionText,
+                COMMISSION_AMOUNT,
+                project_id,
+                "",
+                ""
+            );
+
+            if (!commission) {
+                throw "Транзакция не была создана.";
+            }
+
+            const createCommissionEvent = await createEvent(
+                client,
+                "create",
+                commission.id,
+                commission,
+                "transaction"
+            );
+
+            if (!createCommissionEvent) {
+                throw "Не удалось создать событие создания комиссии";
             }
         }
 
