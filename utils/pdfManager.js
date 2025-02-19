@@ -2,7 +2,6 @@ import fs from 'fs';
 import {jsPDF} from 'jspdf';
 import 'jspdf-autotable'
 import {fileURLToPath} from "url";
-import {checkCrypto} from "./cryptoChecker.js";
 
 const FONT_SIZE = 14;
 const TABLE_FONT_SIZE = 10;
@@ -22,8 +21,7 @@ export const createTransactionsPDF = async (transactions, users, period, project
         currency: ctx.t("currency-header"),
         created: ctx.t("date-header"),
         comment: ctx.t("comment-header"),
-        hash: ctx.t("hash-header"),
-        check: ctx.t("check-header")
+        hash: ctx.t("hash-header")
     }];
 
     let tableBody = [];
@@ -35,9 +33,6 @@ export const createTransactionsPDF = async (transactions, users, period, project
         const user = users.find(u => u.id === transaction.user_id);
         const userName = user.name;
 
-        const check = await checkCrypto(transaction);
-        const checkText = check ? ctx.t("yes-button") : ctx.t('no-button');
-
         tableBody.push([
             transactionId,
             userName,
@@ -46,8 +41,7 @@ export const createTransactionsPDF = async (transactions, users, period, project
             transaction.currency,
             formatDate(date),
             transaction.comment,
-            transaction.hash,
-            checkText
+            transaction.hash
         ]);
     }
 

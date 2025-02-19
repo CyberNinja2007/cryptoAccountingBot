@@ -3,7 +3,6 @@ import fs from 'fs';
 import {fileURLToPath} from 'url';
 import './extensions/stringExtension.js'
 import {generateLinkForCryptoTransaction} from "./cryptoTransactionsManager.js";
-import {checkCrypto} from "./cryptoChecker.js";
 
 const FONT_FILE = fs.readFileSync(fileURLToPath(new URL('../fonts/XO_Oriel_Ni.ttf', import.meta.url)));
 
@@ -24,8 +23,7 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
         ctx.t("type-header"),
         ctx.t("amount-header"),
         ctx.t("currency-header"),
-        ctx.t("hash-header"),
-        ctx.t("check-header")
+        ctx.t("hash-header")
     ];
 
     let tableBody = [];
@@ -36,7 +34,6 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
         const userName = user.name;
         const date = new Date(transaction.created);
         const transactionType = getTransactionType(transaction.type, ctx);
-        const check = await checkCrypto(transaction);
 
         const rowData = {
             id: +transaction.id,
@@ -47,8 +44,7 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
             created: formatDate(date),
             comment: transaction.comment.removeControlCharacters(),
             hash: transaction.hash,
-            crypto_type: transaction.crypto_type,
-            check
+            crypto_type: transaction.crypto_type
         };
 
         tableBody.push(rowData);
