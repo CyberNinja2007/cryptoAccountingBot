@@ -15,7 +15,7 @@ const CURRENCIES_TABLE = process.env.CURRENCIES_TABLE;
 export async function get(userId, projectId, limit, offset, sorting) {
     const query =
         `SELECT t.transaction_id as id, t.fk_user_id as user_id, t.fk_account_id as account_id, t.type, ` +
-        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type FROM ${TRANSACTIONS_TABLE} t ` +
+        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type, t.category FROM ${TRANSACTIONS_TABLE} t ` +
         `JOIN ${CURRENCIES_TABLE} c ON t.fk_currency_id = c.currency_id ` +
         `WHERE t.fk_user_id = $1 AND t.fk_project_id = $2 ` +
         `ORDER BY t.transaction_id ${sorting} ` +
@@ -43,7 +43,7 @@ export async function get(userId, projectId, limit, offset, sorting) {
 export async function getAll(projectId, limit, offset, sorting) {
     const query =
         `SELECT t.transaction_id as id, t.fk_user_id as user_id, t.fk_account_id as account_id, t.type, ` +
-        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type FROM ${TRANSACTIONS_TABLE} t ` +
+        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type, t.category FROM ${TRANSACTIONS_TABLE} t ` +
         `JOIN ${CURRENCIES_TABLE} c ON t.fk_currency_id = c.currency_id ` +
         `WHERE t.fk_project_id = $1 ` +
         `ORDER BY t.transaction_id ${sorting} ` +
@@ -70,7 +70,7 @@ export async function getAll(projectId, limit, offset, sorting) {
 export async function getBetween(startDate, endDate, projectId) {
     const query =
         `SELECT t.transaction_id as id, t.fk_user_id as user_id, t.fk_account_id as account_id, t.type, ` +
-        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type FROM ${TRANSACTIONS_TABLE} t ` +
+        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type, t.category FROM ${TRANSACTIONS_TABLE} t ` +
         `JOIN ${CURRENCIES_TABLE} c ON t.fk_currency_id = c.currency_id ` +
         `WHERE t.created BETWEEN $1 AND $2 ` +
         `AND t.fk_project_id = $3 ` +
