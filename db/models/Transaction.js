@@ -1,5 +1,5 @@
 export class Transaction {
-    constructor(id, user_id, account_id, type, currency, amount, comment, created, project_id, hash, crypto_type) {
+    constructor(id, user_id, account_id, type, currency, amount, comment, created, project_id, hash, crypto_type, category) {
         this.id = id;
         this.user_id = user_id;
         this.account_id = account_id;
@@ -11,5 +11,6 @@ export class Transaction {
         this.project_id = project_id;
         this.hash = hash;
         this.crypto_type = crypto_type;
+        this.category = category;
     }
 }

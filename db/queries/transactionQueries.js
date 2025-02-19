@@ -96,21 +96,22 @@ export async function getBetween(startDate, endDate, projectId) {
  * @param {string} comment - Комментарий к транзакции.
  * @param {number} amount - Сумма транзакции.
  * @param {string} projectId - Идентификатор проекта отправителя.
- * @param {number} hash - Хэш крипто-транзакции.
- * @param {number} cryptoType - Тип крипто-транзакции.
+ * @param {string} hash - Хэш крипто-транзакции.
+ * @param {string} cryptoType - Тип крипто-транзакции.
+ * @param {string} category - Категория.
  * @returns {Promise<Transaction>} Объект новой транзакции.
  */
 export async function create(client, userId, accountId, type, currency,
-                             comment, amount, projectId, hash, cryptoType) {
+                             comment, amount, projectId, hash, cryptoType, category) {
     const query =
         `WITH inserted_transaction AS (` +
         `INSERT INTO ${TRANSACTIONS_TABLE} ` +
-        `(fk_user_id, fk_account_id, type, fk_currency_id, comment, amount, fk_project_id, hash, crypto_type) ` +
-        `VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *) ` +
+        `(fk_user_id, fk_account_id, type, fk_currency_id, comment, amount, fk_project_id, hash, crypto_type, category) ` +
+        `VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *) ` +
         `SELECT t.transaction_id as id, t.fk_user_id as user_id, t.fk_account_id as account_id, t.type, ` +
-        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type FROM inserted_transaction t ` +
+        `c.currency_name as currency, t.amount, t.comment, t.created, t.fk_project_id as project_id, t.hash, t.crypto_type, t.category FROM inserted_transaction t ` +
         `JOIN ${CURRENCIES_TABLE} c ON t.fk_currency_id = c.currency_id`;
-    const values = [userId, accountId, type, currency, comment, amount, projectId, hash, cryptoType];
+    const values = [userId, accountId, type, currency, comment, amount, projectId, hash, cryptoType, category];
     const {rows: [newTransaction]} = await client.query(query, values);
     return {
         ...newTransaction,

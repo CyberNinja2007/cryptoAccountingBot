@@ -2,16 +2,12 @@ import {Scenes} from 'telegraf';
 import {confirmKeyboard} from '../keyboards.js';
 
 import {
-    handleAmountOptions,
-    handleAskAmountOptions,
     handleAskComment,
     handleAskCrypto,
-    handleAskCurrency,
     handleCommentOption,
     handleCryptoOption,
-    handleCurrencyOption,
     handleError,
-    handleMainMenu, handleMaxAmount,
+    handleMainMenu,
 } from '../handlers.js';
 
 import {withCtx} from '../contextWrapper.js';
@@ -23,7 +19,8 @@ import {createControlPoint} from '../utils/eventCreator.js';
 import {filter} from "../utils/filterCommandMessages.js";
 import {pool} from "../db/db.js";
 import {generateLinkForCryptoTransaction} from "../utils/cryptoTransactionsManager.js";
-import {createCryptoTransaction} from "../db/controllers/CryptoTransactionController.js";
+import {currenciesDictionary} from "../utils/currenciesDictionary.js";
+import {transactionCategories} from "../utils/transactionCategories.js";
 
 const COMMISSION_AMOUNT = 3;
 
@@ -40,11 +37,6 @@ const createTransactionScene = new Scenes.WizardScene(
             await handleError(ctx, e);
         }
     },
-    withCtx(handleAskCurrency),
-    withCtx(handleCurrencyOption),
-    withCtx(handleMaxAmount),
-    withCtx(handleAskAmountOptions),
-    withCtx(handleAmountOptions),
     withCtx(handleAskComment),
     withCtx(handleCommentOption),
     withCtx(handleAskCrypto),
@@ -52,21 +44,16 @@ const createTransactionScene = new Scenes.WizardScene(
     async (ctx) => {
         try {
             const type = ctx.wizard.state.type;
-            const currency = ctx.wizard.state.currency.name;
-            const amount = ctx.wizard.state.amount;
-            const amountString = amount.toLocaleString("de", {maximumFractionDigits: 2});
             const comment = ctx.wizard.state.comment;
-            const cryptoTransactions = ctx.wizard.state.cryptoTransactions;
+            const cryptoTransaction = ctx.wizard.state.cryptoTransaction;
 
-            let cryptoTransactionString = ctx.t("crypto-transactions");
+            const currency = currenciesDictionary[cryptoTransaction.token];
+            const amount = cryptoTransaction.amount;
+            const amountString = amount.toLocaleString("de", {maximumFractionDigits: 2});
 
-            if (cryptoTransactions) {
-                cryptoTransactions.forEach((cryptoTransaction, index) => {
-                    const linkToInfo = generateLinkForCryptoTransaction(cryptoTransaction.type, cryptoTransaction.hash);
-                    cryptoTransactionString += `${index + 1}. <a href="${linkToInfo}">${cryptoTransaction.amount.toLocaleString("de", {maximumFractionDigits: 2})} ${cryptoTransaction.token}</a>\n`
-                })
-                cryptoTransactionString += "\n";
-            }
+            const linkToInfo = generateLinkForCryptoTransaction(cryptoTransaction.type, cryptoTransaction.hash);
+            const cryptoTransactionString = ctx.t("crypto-transactions") +
+                `<a href="${linkToInfo}">${amount.toLocaleString("de", {maximumFractionDigits: 2})} ${cryptoTransaction.token}</a>\n\n`;
 
             const confirmMessage = ctx.t("transaction-summary", {
                 type,
@@ -94,10 +81,11 @@ createTransactionScene.action("confirm_income", async (ctx) => {
     const account_id = ctx.session.account_id;
     const project_id = ctx.session.project.id
     const type = ctx.wizard.state.type;
-    const currency = ctx.wizard.state.currency;
-    const amount = ctx.wizard.state.amount;
     const comment = ctx.wizard.state.comment;
-    const cryptoTransactions = ctx.wizard.state.cryptoTransactions;
+    const cryptoTransaction = ctx.wizard.state.cryptoTransaction;
+    const currency = currenciesDictionary[cryptoTransaction.token];
+    const availableCurrency = ctx.session.availableCurrencies.find(c => c.name === currency);
+    const amount = cryptoTransaction.amount;
 
     const client = await pool.connect();
 
@@ -115,12 +103,12 @@ createTransactionScene.action("confirm_income", async (ctx) => {
             user_id,
             account_id,
             type,
-            currency.id,
+            availableCurrency.id,
             comment,
             amount,
             project_id,
-            cryptoTransactions[0].hash,
-            cryptoTransactions[0].type
+            cryptoTransaction.hash,
+            cryptoTransaction.type
         );
 
         if (!transaction) {
@@ -139,27 +127,6 @@ createTransactionScene.action("confirm_income", async (ctx) => {
             throw "Не удалось создать событие создания транзакции";
         }
 
-        for (const cryptoTransaction of cryptoTransactions) {
-            const createdCryptoTransaction =
-                await createCryptoTransaction(client, cryptoTransaction.amount, cryptoTransaction.token, cryptoTransaction.hash);
-
-            if (!createdCryptoTransaction) {
-                throw "Крипто-транзакция не была успешно создана";
-            }
-
-            const createCryptoTransactionEvent = await createEvent(
-                client,
-                "create",
-                createdCryptoTransaction.id,
-                createdCryptoTransaction,
-                "cryptoTransaction"
-            );
-
-            if (!createCryptoTransactionEvent) {
-                throw "Не удалось создать событие создания крипто-транзакции";
-            }
-        }
-
         if(type === "out"){
             const commissionText = `Оплата комиссии kwex для транзакции #${transaction.id}`
 
@@ -173,7 +140,8 @@ createTransactionScene.action("confirm_income", async (ctx) => {
                 COMMISSION_AMOUNT,
                 project_id,
                 "",
-                ""
+                "",
+                transactionCategories["commission"]
             );
 
             if (!commission) {

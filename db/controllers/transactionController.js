@@ -68,13 +68,14 @@ export async function getTransactionsBetween(start, end, projectId) {
  * @param {string} projectId - Идентификатор проекта отправителя.
  * @param {string} hash - Хэш крипто-транзакции.
  * @param {string} cryptoType - Тип крипто-транзакции.
+ * @param {string | null} category - Категория.
  * @returns {Promise<Transaction | null>} Созданная транзакция, или null в случае ошибки.
  */
 export async function createTransaction(client, userId, accountId, type, currency,
-                                        comment, amount, projectId, hash, cryptoType) {
+                                        comment, amount, projectId, hash, cryptoType, category = null) {
     try {
         const transaction =
-            await create(client, userId, accountId, type, currency, comment, amount, projectId, hash, cryptoType);
+            await create(client, userId, accountId, type, currency, comment, amount, projectId, hash, cryptoType, category);
 
         if (!transaction) {
             throw `Транзакция на сумму ${amount} для пользователя ${userId} не была создана.`;
