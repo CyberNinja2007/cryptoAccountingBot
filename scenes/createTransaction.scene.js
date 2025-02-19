@@ -37,10 +37,10 @@ const createTransactionScene = new Scenes.WizardScene(
             await handleError(ctx, e);
         }
     },
-    withCtx(handleAskComment),
-    withCtx(handleCommentOption),
     withCtx(handleAskCrypto),
     withCtx(handleCryptoOption),
+    withCtx(handleAskComment),
+    withCtx(handleCommentOption),
     async (ctx) => {
         try {
             const type = ctx.wizard.state.type;
