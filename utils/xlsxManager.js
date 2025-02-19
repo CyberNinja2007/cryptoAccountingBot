@@ -60,22 +60,18 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
 
     const outcomeBodyStyle = createBodyStyle(workbook, FONT_FILE, ctx.t("outcome-button"), ctx);
 
-    const checkPosStyle = createCheckPositiveStyle(workbook, FONT_FILE);
-
-    const checkNegStyle = createCheckNegativeStyle(workbook, FONT_FILE);
-
     const bodyWithoutFillStyle = createBodyStyleWithoutFill(workbook, FONT_FILE);
 
     const allTransactionsList = workbook.addWorksheet(ctx.t("all-transactions-header"));
     fillWorksheetWithTransactions(allTransactionsList, baseTableHeader, period, nameStyle, headingStyle,
-        tableBody, incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, checkPosStyle, checkNegStyle, ctx);
+        tableBody, incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, ctx);
 
 
     const incomeTransactions = tableBody.filter(t => t.type === ctx.t("income-button") && t.category !== "exchange-category");
     if (incomeTransactions.length > 0) {
         const incomeList = workbook.addWorksheet(ctx.t("incomes-list-header"));
         fillWorksheetWithTransactions(incomeList, baseTableHeader, period, nameStyle, headingStyle, incomeTransactions,
-            incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, checkPosStyle, checkNegStyle, ctx);
+            incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, ctx);
     }
 
 
@@ -83,7 +79,7 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
     if (outcomeTransactions.length > 0) {
         const outcomeList = workbook.addWorksheet(ctx.t("outcomes-list-header"));
         fillWorksheetWithTransactions(outcomeList, baseTableHeader, period, nameStyle, headingStyle, outcomeTransactions,
-            incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, checkPosStyle, checkNegStyle, ctx);
+            incomeBodyStyle, outcomeBodyStyle, bodyWithoutFillStyle, ctx);
     }
 
     return await workbook.writeToBuffer();
@@ -190,50 +186,6 @@ const createBodyStyleWithoutFill = (workbook, fontFile) => workbook.createStyle(
 });
 
 /**
- * Вшивает шрифт в книгу как стиль для заголовка.
- *
- * @param {Workbook} workbook - Рабочая книга.
- * @param {Buffer} fontFile - Файл со шрифтом.
- * @returns {Style} Отформатированная строка с датой.
- */
-const createCheckPositiveStyle = (workbook, fontFile) => workbook.createStyle({
-    font: {
-        name: 'XO Oriel Bold',
-        src: `url(data:font/truetype;base64,${fontFile.toString('base64')})`,
-        bold: false,
-        size: 10,
-        color: "#47b149"
-    },
-    alignment: {
-        horizontal: 'center',
-        vertical: 'center',
-        wrapText: true
-    }
-});
-
-/**
- * Вшивает шрифт в книгу как стиль для заголовка.
- *
- * @param {Workbook} workbook - Рабочая книга.
- * @param {Buffer} fontFile - Файл со шрифтом.
- * @returns {Style} Отформатированная строка с датой.
- */
-const createCheckNegativeStyle = (workbook, fontFile) => workbook.createStyle({
-    font: {
-        name: 'XO Oriel Bold',
-        src: `url(data:font/truetype;base64,${fontFile.toString('base64')})`,
-        bold: false,
-        size: 10,
-        color: "#b14747"
-    },
-    alignment: {
-        horizontal: 'center',
-        vertical: 'center',
-        wrapText: true
-    }
-});
-
-/**
  * Заполняет лист транзакциями.
  *
  * @param {Worksheet} worksheet - Рабочий лист.
@@ -245,13 +197,11 @@ const createCheckNegativeStyle = (workbook, fontFile) => workbook.createStyle({
  * @param {Style} incomeBodyStyle - Стиль для приходов.
  * @param {Style} outcomeBodyStyle - Стиль для расходов.
  * @param {Style} bodyWithoutFillStyle - Стиль без заполнения.
- * @param {Style} checkPosStyle - Стиль для колонки Check положительный.
- * @param {Style} checkNegStyle - Стиль для колонки Check отрицательный.
  * @param {object} ctx - Контекст телеграм
  */
 const fillWorksheetWithTransactions = (worksheet, tableHeader, period, nameStyle, headingStyle,
                                        tableBody, incomeBodyStyle, outcomeBodyStyle,
-                                       bodyWithoutFillStyle, checkPosStyle, checkNegStyle, ctx) => {
+                                       bodyWithoutFillStyle, ctx) => {
     let row = 1;
 
     worksheet.cell(row, 1, row, tableHeader.length, true).string(`${ctx.t("report-scene-name")} ${period}`).style(nameStyle);
@@ -279,10 +229,6 @@ const fillWorksheetWithTransactions = (worksheet, tableHeader, period, nameStyle
         worksheet.cell(row, ++column).number(item.amount).style(bodyWithoutFillStyle);
         worksheet.cell(row, ++column).string(item.currency).style(bodyWithoutFillStyle);
         worksheet.cell(row, ++column).link(generateLinkForCryptoTransaction(item.crypto_type, item.hash), item.hash).style(bodyWithoutFillStyle);
-
-        const style = item.check ? checkPosStyle : checkNegStyle;
-        const checkEmoji = item.check ? '✅' : '❌';
-        worksheet.cell(row, ++column).string(checkEmoji).style(style);
 
         row++;
     });
