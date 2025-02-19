@@ -41,7 +41,7 @@ input-period = Выберите период:
 
 input-report-type = Выберите удобную форму представления.
 
-input-report-type-with-filter = Активные фильтры:{"\u000A"}{ $type }{"\u000A"}Выберите удобную форму представления.
+input-report-type-with-filter = Активные фильтры:{"\u000A"}{"\u000A"}{ $type }{"\u000A"}{ $user }{"\u000A"}{"\u000A"}Выберите удобную форму представления.
 
 input-beginning-date = Выберите дату начала:
 
@@ -50,6 +50,8 @@ input-end-date = Выберите дату окончания:
 input-day = Выберите день:
 
 input-types = Выберите тип:
+
+input-users = Выберите пользователя:
 
 period = {
     $isEqual ->
@@ -218,6 +220,10 @@ day-button = { $day } день
 
 pdf-button = PDF
 
+full-pdf-button = Полный PDF
+
 excel-button = Excel
 
 add-type-filter-button = Фильтр [Тип]
+
+add-user-filter-button = Фильтр [Пользователь]

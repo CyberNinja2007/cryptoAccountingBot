@@ -43,7 +43,7 @@ input-period = Choose a period:
 
 input-report-type = Choose a convenient form of representation.
 
-input-report-type-with-filter = Active filters:{ $type }{"\u000A"}Choose a convenient form of representation.
+input-report-type-with-filter = Active filters:{"\u000A"}{"\u000A"}{ $type }{"\u000A"}{ $user }{"\u000A"}{"\u000A"}Choose a convenient form of representation.
 
 input-beginning-date = Choose start date:
 
@@ -52,6 +52,8 @@ input-end-date = Choose end date:
 input-day = Choose a day:
 
 input-types = Choose type:
+
+input-users = Choose user:
 
 period = {
     $isEqual ->
@@ -222,6 +224,10 @@ day-button = { $day } day
 
 pdf-button = PDF
 
+full-pdf-button = Full PDF
+
 excel-button = Excel
 
 add-type-filter-button = Filter [Type]
+
+add-user-filter-button = Filter [User]

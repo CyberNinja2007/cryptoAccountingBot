@@ -2,11 +2,9 @@ import {Input, Scenes} from 'telegraf';
 
 import {
     createMainMenuKeyboard,
-    currencyInlineKeyboard,
     dateKeyboard,
     daysKeyboard,
     downloadFilterOptionKeyboard,
-    downloadOptionKeyboard,
     inlineTypesKeyboard,
     inlineUsersKeyboard,
     monthsAndYearsKeyboard,
@@ -30,6 +28,7 @@ import {
 import {permissionsEnum} from "../utils/permissionsEmum.js";
 import {filter} from "../utils/filterCommandMessages.js";
 import '../utils/extensions/stringExtension.js';
+import {transactionCategories} from "../utils/transactionCategories.js";
 
 const LAUNCH_YEAR = +process.env.LAUNCH_YEAR;
 const TRANSACTION_TYPES = {"in": "Приход", "out": "Расход"};
@@ -56,7 +55,7 @@ reportScene.action(
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true)
+                downloadFilterOptionKeyboard(ctx, true, true)
             );
 
             await ctx.answerCbQuery('');
@@ -119,7 +118,7 @@ reportScene.action(/^[0-9]* число$/i, async (ctx) => {
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true)
+                downloadFilterOptionKeyboard(ctx, true, true)
             );
         } else {
             ctx.wizard.state.startDay = pickedDay;
@@ -139,38 +138,6 @@ reportScene.action(/^[0-9]* число$/i, async (ctx) => {
         await ctx.answerCbQuery('');
 
         return ctx.wizard.next();
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action("applyTypeFilter", async (ctx) => {
-    try {
-        ctx.editMessageText(ctx.t("input-types"), await inlineTypesKeyboard(ctx, TRANSACTION_TYPES));
-
-        await ctx.answerCbQuery('');
-    } catch (e) {
-        await ctx.answerCbQuery('');
-
-        await handleError(ctx, e);
-    }
-});
-
-reportScene.action(/^type_[a-z]+$/i, async (ctx) => {
-    try {
-        const type = ctx.match.input.split("_")[1];
-        ctx.wizard.state.type_filter = type;
-
-        await ctx.editMessageText(
-            ctx.t("input-report-type-with-filter", {
-                type: TRANSACTION_TYPES[type]
-            }),
-            downloadFilterOptionKeyboard(ctx,  false)
-        );
-
-        await ctx.answerCbQuery('');
     } catch (e) {
         await ctx.answerCbQuery('');
 
@@ -199,7 +166,101 @@ reportScene.action(/^[0-9]* месяц$/i, async (ctx) => {
     }
 });
 
-reportScene.action(["downloadPdf"], async (ctx) => {
+reportScene.action("applyTypeFilter", async (ctx) => {
+    try {
+        ctx.editMessageText(ctx.t("input-types"), await inlineTypesKeyboard(ctx, TRANSACTION_TYPES));
+
+        await ctx.answerCbQuery('');
+    } catch (e) {
+        await ctx.answerCbQuery('');
+
+        await handleError(ctx, e);
+    }
+});
+
+reportScene.action(/^type_[a-z]+$/i, async (ctx) => {
+    try {
+        const type = ctx.match.input.split("_")[1];
+        ctx.wizard.state.type_filter = type;
+        const user = ctx.wizard.state.user_filter || {name: ""}
+        const isUserFilterNeeded = !ctx.wizard.state.user_filter;
+
+        await ctx.editMessageText(
+            ctx.t("input-report-type-with-filter", {
+                type: TRANSACTION_TYPES[type],
+                user: user.name
+            }),
+            downloadFilterOptionKeyboard(ctx,  false, isUserFilterNeeded)
+        );
+
+        await ctx.answerCbQuery('');
+    } catch (e) {
+        await ctx.answerCbQuery('');
+
+        await handleError(ctx, e);
+    }
+});
+
+reportScene.action("applyUserFilter", async (ctx) => {
+    try {
+        const users = await getUsers();
+
+        if(!users){
+            throw "Пользователей не существует!";
+        }
+
+        const filteredUsers = [];
+
+        for(let i = 0; i < users.length; i++){
+            const ifUserOperator = await checkIfUserOperator(users[i].id, ctx.session.project.id);
+
+            if(ifUserOperator)
+                filteredUsers.push(users[i]);
+        }
+
+        ctx.wizard.state.availableUsers = filteredUsers;
+
+        ctx.editMessageText(ctx.t("input-users"), await inlineUsersKeyboard(ctx, filteredUsers));
+
+        await ctx.answerCbQuery('');
+    } catch (e) {
+        await ctx.answerCbQuery('');
+
+        await handleError(ctx, e);
+    }
+});
+
+reportScene.action(/^user_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, async (ctx) => {
+    try {
+        const user_id = ctx.match.input.split("_")[1];
+
+        const user = ctx.wizard.state.availableUsers.find(u => u.id === user_id);
+
+        if(!user){
+            throw "Выбранного пользователя не существует!";
+        }
+
+        ctx.wizard.state.user_filter = user;
+        const type = ctx.wizard.state.type_filter || "";
+        const typeFilterNeeded = !ctx.wizard.state.type_filter;
+
+        await ctx.editMessageText(
+            ctx.t("input-report-type-with-filter", {
+                type: type === "" ? type : TRANSACTION_TYPES[type],
+                user: user.name
+            }),
+            downloadFilterOptionKeyboard(ctx,  typeFilterNeeded, false)
+        );
+
+        await ctx.answerCbQuery('');
+    } catch (e) {
+        await ctx.answerCbQuery('');
+
+        await handleError(ctx, e);
+    }
+});
+
+reportScene.action(["downloadPdf", "downloadFullPdf"], async (ctx) => {
     try {
         await ctx.answerCbQuery('');
 
@@ -215,6 +276,12 @@ reportScene.action(["downloadPdf"], async (ctx) => {
             endDate,
             ctx.session.project.id
         );
+
+        const isFullPdfNeeded = ctx.match.input.includes("Full");
+
+        if(!isFullPdfNeeded){
+            transactionsInPeriod.filter(t => t.category !== transactionCategories["commission"]);
+        }
 
         const isAllowed = await checkUserPermission(ctx.session.user.id, ctx.session.project.id, permissionsEnum["getAllInfo"]);
 

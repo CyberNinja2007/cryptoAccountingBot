@@ -250,33 +250,13 @@ export const daysKeyboard = (ctx, month) => {
 /**
  * Генерирует клавиатуру для выбора вариантов загрузки.
  */
-export const downloadOptionKeyboard = (ctx, isPdfNeeded = true, isExcelNeeded = true) => {
-    let keyboard = [[]];
-
-    if (isPdfNeeded) {
-        keyboard[0].push(Markup.button.callback(ctx.t("pdf-button"), "downloadPdf"));
-    }
-
-    if (isExcelNeeded) {
-        keyboard[1] ?
-            keyboard[1].push(Markup.button.callback(ctx.t("excel-button"), "downloadXlsx")) :
-            keyboard.push([Markup.button.callback(ctx.t("excel-button"), "downloadXlsx")]);
-    }
-
-    keyboard.push([Markup.button.callback(ctx.t("cancel-button"), "exit")]);
-
-    return Markup.inlineKeyboard(keyboard);
-};
-
-/**
- * Генерирует клавиатуру для выбора вариантов загрузки.
- */
-export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded,
+export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded, userFilterNeeded,
                                              isPdfNeeded = true, isExcelNeeded = true) => {
     let keyboard = [[]];
 
     if (isPdfNeeded) {
         keyboard[0].push(Markup.button.callback(ctx.t("pdf-button"), "downloadPdf"));
+        keyboard[0].push(Markup.button.callback(ctx.t("full-pdf-button"), "downloadFullPdf"));
     }
 
     if (isExcelNeeded) {
@@ -288,6 +268,11 @@ export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded,
     if (typeFilterNeeded) {
         keyboard.length > 2 ? keyboard.at(-1).push(Markup.button.callback(ctx.t("add-type-filter-button"), "applyTypeFilter"))
             : keyboard.push([Markup.button.callback(ctx.t("add-type-filter-button"), "applyTypeFilter")]);
+    }
+
+    if (userFilterNeeded) {
+        keyboard.length > 2 ? keyboard.at(-1).push(Markup.button.callback(ctx.t("add-user-filter-button"), "applyUserFilter"))
+            : keyboard.push([Markup.button.callback(ctx.t("add-user-filter-button"), "applyUserFilter")]);
     }
 
     keyboard.push([Markup.button.callback(ctx.t("cancel-button"), "exit")]);
