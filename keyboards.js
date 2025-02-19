@@ -296,54 +296,6 @@ export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded,
 };
 
 /**
- * Генерирует клавиатуру для выбора валюты.
- */
-export const currencyKeyboard = (ctx, currencies) => {
-    const keyboard = [];
-
-    for (let i = 0; i < currencies.length;) {
-        if (currencies[i + 1]) {
-            keyboard.push([
-                Markup.button.text(currencies[i].name),
-                Markup.button.text(currencies[i + 1].name),
-            ]);
-            i += 2;
-        } else {
-            keyboard.push([Markup.button.text(currencies[i].name)]);
-            i++;
-        }
-    }
-
-    keyboard.push([Markup.button.text(ctx.t("exit-button"))]);
-
-    return Markup.keyboard(keyboard);
-};
-
-/**
- * Генерирует клавиатуру для выбора валюты.
- */
-export const currencyInlineKeyboard = (ctx, currencies) => {
-    let keyboard = [];
-
-    for (let i = 0; i < currencies.length;) {
-        if (currencies[i + 1]) {
-            keyboard.push([
-                Markup.button.callback(currencies[i].name, currencies[i + 1].name),
-                Markup.button.callback(currencies[i + 1].name, currencies[i + 1].name),
-            ]);
-            i += 2;
-        } else {
-            keyboard.push([Markup.button.callback(currencies[i].name, currencies[i].name)]);
-            i++;
-        }
-    }
-
-    keyboard.push([Markup.button.callback(ctx.t("exit-button"), "exit")]);
-
-    return Markup.inlineKeyboard(keyboard);
-};
-
-/**
  * Генерирует клавиатуру для списка пользователей с выбором проекта.
  *
  * @param {Array<User>} users - Пользователи.
