@@ -135,7 +135,7 @@ createTransactionScene.action("confirm_income", async (ctx) => {
                 user_id,
                 account_id,
                 type,
-                currency.id,
+                availableCurrency.id,
                 commissionText,
                 COMMISSION_AMOUNT,
                 project_id,
