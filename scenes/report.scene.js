@@ -230,9 +230,9 @@ reportScene.action("applyUserFilter", async (ctx) => {
     }
 });
 
-reportScene.action(/^user_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, async (ctx) => {
+reportScene.action(/^user#[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, async (ctx) => {
     try {
-        const user_id = ctx.match.input.split("_")[1];
+        const user_id = ctx.match.input.split("#")[1];
 
         const user = ctx.wizard.state.availableUsers.find(u => u.id === user_id);
 
@@ -265,6 +265,7 @@ reportScene.action(["downloadPdf", "downloadFullPdf"], async (ctx) => {
         await ctx.answerCbQuery('');
 
         const type = ctx.wizard.state.type_filter;
+        const user = ctx.wizard.state.user_filter;
         const [startDate, endDate] = formatDates(ctx);
         const startDateText = startDate.toLocaleDateString("ru");
         const endDateText = endDate.toLocaleDateString("ru");
@@ -280,7 +281,7 @@ reportScene.action(["downloadPdf", "downloadFullPdf"], async (ctx) => {
         const isFullPdfNeeded = ctx.match.input.includes("Full");
 
         if(!isFullPdfNeeded){
-            transactionsInPeriod.filter(t => t.category !== transactionCategories["commission"]);
+            transactionsInPeriod = transactionsInPeriod.filter(t => t.category !== transactionCategories["commission"]);
         }
 
         const isAllowed = await checkUserPermission(ctx.session.user.id, ctx.session.project.id, permissionsEnum["getAllInfo"]);
@@ -291,6 +292,10 @@ reportScene.action(["downloadPdf", "downloadFullPdf"], async (ctx) => {
 
         if (type) {
             transactionsInPeriod = transactionsInPeriod.filter(t => t.type === type);
+        }
+
+        if (user) {
+            transactionsInPeriod = transactionsInPeriod.filter(t => t.user_id === user.id);
         }
 
         const users = await getUsers();
