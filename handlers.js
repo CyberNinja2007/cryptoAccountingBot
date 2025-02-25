@@ -1,7 +1,125 @@
-import {createMainMenuKeyboard, exitKeyboard,} from './keyboards.js';
+import {createMainMenuKeyboard, currencyKeyboard, exitKeyboard,} from './keyboards.js';
 import {getInfoAboutTransactionByHash} from './utils/cryptoTransactionsManager.js';
 import {countProjectsWithPermissions, getUserProjectPermissions} from "./utils/permissionManager.js";
 import {getAccount} from "./db/controllers/accountController.js";
+
+export const handleNeedInAmountInput = async (ctx) => {
+    try {
+        const project = ctx.session.project;
+
+        if(project.crypto_only){
+            ctx.wizard.cursor += 6;
+        }
+        else {
+            ctx.wizard.cursor ++;
+        }
+
+        return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
+
+/**
+ * Обрабатывает запрос на выбор валюты транзакции.
+ * @param {Object} ctx - Контекст Telegraf.
+ */
+export const handleAskCurrency = async (ctx) => {
+    try {
+        if(ctx.session.availableCurrencies.length > 1) {
+            await ctx.replyWithHTML(ctx.t("input-currency"), currencyKeyboard(ctx, ctx.session.availableCurrencies));
+            return ctx.wizard.next();
+        } else {
+            ctx.wizard.state.currency = ctx.session.availableCurrencies[0];
+            ctx.wizard.cursor += 2;
+            return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+        }
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
+
+/**
+ * Обрабатывает выбор пользователя валюты транзакции.
+ * @param {Object} ctx - Контекст Telegraf.
+ */
+export const handleCurrencyOption = async (ctx) => {
+    try {
+        const currency = ctx.message.text;
+
+        const currIndex = ctx.session.availableCurrencies.findIndex((curr) => curr.name === currency);
+
+        if (currIndex === -1 || ctx.wizard.state.currency) {
+            ctx.reply(ctx.t("input-error-currency"));
+            ctx.wizard.state.currency = undefined;
+
+            ctx.wizard.cursor--;
+            return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+        }
+
+        ctx.wizard.state.currency = ctx.session.availableCurrencies[currIndex];
+
+        await ctx.replyWithHTML(ctx.t("picked-currency", {currency: ctx.wizard.state.currency.name}), Markup.removeKeyboard());
+
+        ctx.wizard.cursor++;
+        return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
+
+/**
+ * Запрашивает у пользователя ввод суммы транзакции.
+ * @param {Object} ctx - Контекст Telegraf.
+ */
+export const handleAskAmountOptions = async (ctx) => {
+    try {
+        await ctx.replyWithHTML(ctx.t("write-all-amount-data"), exitKeyboard(ctx));
+        return ctx.wizard.next();
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
+
+/**
+ * Обрабатывает введенную пользователем параметры транзакции.
+ * @param {Object} ctx - Контекст Telegraf.
+ */
+export const handleAmountOptions = async (ctx) => {
+    try {
+        const amount = +ctx.message.text.trim();
+
+        if (isNaN(amount) || amount <= 0 || typeof amount !== "number") {
+            ctx.reply(ctx.t("input-error-amount"));
+            ctx.wizard.cursor--;
+            return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+        }
+
+        ctx.wizard.state.amount = amount;
+
+        ctx.wizard.cursor++;
+        return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
+
+export const handleNeedInCryptoInput = async (ctx) => {
+    try {
+        const project = ctx.session.project;
+
+        if(project.crypto_only){
+            ctx.wizard.cursor++;
+        }
+        else {
+            ctx.wizard.cursor += 3;
+        }
+
+        return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+    } catch (e) {
+        await handleError(ctx, e);
+    }
+};
 
 /**
  * Запрашивает у пользователя о его криптотранзакциях.

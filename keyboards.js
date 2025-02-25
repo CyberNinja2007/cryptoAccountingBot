@@ -83,6 +83,30 @@ export const createMainMenuKeyboard = (ctx, allowedExit, projectType, userRights
 };
 
 /**
+ * Генерирует клавиатуру для выбора валюты.
+ */
+export const currencyKeyboard = (ctx, currencies) => {
+    const keyboard = [];
+
+    for (let i = 0; i < currencies.length;) {
+        if (currencies[i + 1]) {
+            keyboard.push([
+                Markup.button.text(currencies[i].name),
+                Markup.button.text(currencies[i + 1].name),
+            ]);
+            i += 2;
+        } else {
+            keyboard.push([Markup.button.text(currencies[i].name)]);
+            i++;
+        }
+    }
+
+    keyboard.push([Markup.button.text(ctx.t("exit-button"))]);
+
+    return Markup.keyboard(keyboard);
+};
+
+/**
  * Генерирует клавиатуру для выхода.
  *
  * @return {Markup} Сгенерированная клавиатура для выхода.
