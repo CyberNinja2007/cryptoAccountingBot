@@ -112,11 +112,8 @@ input-currency = Choose a currency below:
 
 picked-currency = Chosen { $currency }
 
-write-all-amount-data = Enter the amount in format {
-    $needMaxBalance ->
-    [true] (not more than { $availableBalance }) :
-    *[other] :
-}{"\u000A"}[amount]
+write-all-amount-data = Enter the amount in format
+                        {"\u000A"}[amount]
 
 input-crypto = Enter the link to transaction from TRONSCAN/ETHERSCAN/BSCSCAN, for example:
                 https://tronscan.org/#/transaction/3194a00c5cf427a931b908453588b2ca3f661dafa3860b76a6362d08b3b08583
@@ -161,6 +158,8 @@ open-project-button = { open-button } {
 }
 
 balance-button = Balance
+
+main-balance-button = Main balance
 
 income-button = Income
 

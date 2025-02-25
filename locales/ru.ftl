@@ -108,11 +108,8 @@ input-currency = Выберите валюту:
 
 picked-currency = Выбрано: { $currency }
 
-write-all-amount-data = Введите сумму в формате {
-    $needMaxBalance ->
-    [true] (не более { $availableBalance }) :
-    *[other] :
-}{"\u000A"}[сумма]
+write-all-amount-data = Введите сумму в формате:
+                        {"\u000A"}[сумма]
 
 input-crypto = Введите ссылку на транзакцию из TRONSCAN/ETHERSCAN/BSCSCAN, например:
                 https://tronscan.org/#/transaction/3194a00c5cf427a931b908453588b2ca3f661dafa3860b76a6362d08b3b08583
@@ -157,6 +154,8 @@ open-project-button = { open-button } {
 }
 
 balance-button = Баланс
+
+main-balance-button = Общий баланс
 
 income-button = Приход
 
