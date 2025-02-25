@@ -9,7 +9,7 @@ const currenciesTable = process.env.CURRENCIES_TABLE;
  * @returns {Promise<Array<Project>>} Массив объектов всех проектов.
  */
 export async function getAll() {
-    const query = `SELECT project_id as id, project_name as name, project_type as type FROM ${projectsTable} ORDER BY project_id`;
+    const query = `SELECT project_id as id, project_name as name, project_type as type, crypto_only, full_report_only FROM ${projectsTable} ORDER BY project_id`;
     const result = await pool.query(query);
     return result.rows;
 }
