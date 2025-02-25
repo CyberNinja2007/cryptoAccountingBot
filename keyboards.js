@@ -69,6 +69,26 @@ export const createMainMenuKeyboard = (ctx, allowedExit, projectType, userRights
             }
             break;
         }
+        case "project": {
+            if (userRights.find(p => p.permission_id === permissionsEnum["balance"] && p.allowed)) {
+                keyboard.push([Markup.button.text(ctx.t("main-balance-button"))]);
+            }
+
+            if (userRights.find(p => p.permission_id === permissionsEnum["income"] && p.allowed)) {
+                keyboard.push([Markup.button.text(ctx.t("income-button"))]);
+            }
+
+            if (userRights.find(p => p.permission_id === permissionsEnum["outcome"] && p.allowed)) {
+                keyboard.length > 1 ? keyboard[1].push(Markup.button.text(ctx.t("outcome-button"))) :
+                    keyboard.push([Markup.button.text(ctx.t("outcome-button"))]);
+            }
+
+            if (userRights.find(p => p.permission_id === permissionsEnum["report"])) {
+                keyboard.length > 2 && keyboard[2].length !== 2 ? keyboard[2].push(Markup.button.text(ctx.t("report-button"))) :
+                    keyboard.push([Markup.button.text(ctx.t("report-button"))]);
+            }
+            break;
+        }
     }
 
     // Добавляем кнопку выхода, если разрешено
@@ -275,11 +295,14 @@ export const daysKeyboard = (ctx, month) => {
  * Генерирует клавиатуру для выбора вариантов загрузки.
  */
 export const downloadFilterOptionKeyboard = (ctx, typeFilterNeeded, userFilterNeeded,
-                                             isPdfNeeded = true, isExcelNeeded = true) => {
+                                             isPdfNeeded, isFullPdfNeeded = true, isExcelNeeded = true) => {
     let keyboard = [[]];
 
     if (isPdfNeeded) {
         keyboard[0].push(Markup.button.callback(ctx.t("pdf-button"), "downloadPdf"));
+    }
+
+    if(isFullPdfNeeded){
         keyboard[0].push(Markup.button.callback(ctx.t("full-pdf-button"), "downloadFullPdf"));
     }
 
