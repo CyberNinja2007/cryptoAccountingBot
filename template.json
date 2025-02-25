@@ -2,5 +2,13 @@
   "apiKeys": {
     "tronscan": [],
     "etherscan": []
-  }
+  },
+  "serviceOutcome": {
+    "project_id": "",
+    "time": "* * * * * *",
+    "amount": 0,
+    "currency_id": "",
+    "comment": ""
+  },
+  "adminTelegramAccountIds": []
 }

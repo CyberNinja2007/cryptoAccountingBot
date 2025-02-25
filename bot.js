@@ -14,6 +14,16 @@ import reportScene from './scenes/report.scene.js';
 import startScene from './scenes/start.scene.js';
 
 import {I18n} from "@grammyjs/i18n";
+import {gracefulShutdown, scheduleJob} from "node-schedule";
+import {fileURLToPath} from "url";
+import {readJsonFile} from "./utils/jsonHelper.js";
+import {createControlPoint} from "./utils/eventCreator.js";
+import {createTransaction} from "./db/controllers/transactionController.js";
+import {createEvent} from "./db/controllers/eventsController.js";
+import {pool} from "./db/db.js";
+import {getAccountByUserId} from "./db/controllers/accountController.js";
+import {getUsers} from "./db/controllers/userController.js";
+import {checkIfUserOperator} from "./utils/permissionManager.js";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session());
@@ -58,14 +68,97 @@ bot.start(async (ctx) => {
 
 // Главная функция
 (async () => {
+    const configFilePath = fileURLToPath(new URL('config.json', import.meta.url));
+    const config = readJsonFile(configFilePath);
+    const serviceOutcomeParams = config.serviceOutcome;
+
     bot.launch();
+    scheduleJob(serviceOutcomeParams.time, async () => {
+        const client = await pool.connect();
+
+        const users = await getUsers();
+        const allowedUsers = await Promise.all(users.map(async u =>
+            await checkIfUserOperator(u.id, serviceOutcomeParams.project_id)))
+        const operators = users.filter(
+            (user, index) => {
+                return allowedUsers[index] && user.status !== "off"
+            }
+        );
+
+        try {
+            await client.query('BEGIN');
+
+            for(let i = 0; i < operators.length; i++) {
+                const user_id = operators[i].id;
+
+                const accounts = await getAccountByUserId(user_id);
+
+                const isControlPointCreated = await createControlPoint(client, serviceOutcomeParams.project_id);
+
+                if (!isControlPointCreated) {
+                    throw "Контрольная точка не была создана";
+                }
+
+                const serviceHash = "";
+                const serviceCryptoType = "";
+
+                const transaction = await createTransaction(
+                    client,
+                    user_id,
+                    accounts[0].id,
+                    "out",
+                    serviceOutcomeParams.currency_id,
+                    serviceOutcomeParams.comment,
+                    serviceOutcomeParams.amount,
+                    serviceOutcomeParams.project_id,
+                    serviceHash,
+                    serviceCryptoType
+                );
+
+                if (!transaction) {
+                    throw "Транзакция не была создана.";
+                }
+
+                const createTransactionEvent = await createEvent(
+                    client,
+                    "create",
+                    transaction.id,
+                    transaction,
+                    "transaction"
+                );
+
+                if (!createTransactionEvent) {
+                    throw "Не удалось создать событие создания транзакции";
+                }
+            }
+
+            await client.query('COMMIT');
+            client.release();
+        } catch (error) {
+            await client.query('ROLLBACK');
+            client.release();
+
+            console.error("При создании сервисного расхода возникла ошибка: ", error);
+
+            const adminAccounts = config.adminTelegramAccountIds;
+
+            for(let i = 0; i < adminAccounts.length; i++) {
+                await bot.telegram.sendMessage(adminAccounts, "Не удалось создать сервисный расход!");
+            }
+
+            await gracefulShutdown();
+        }
+    });
+
     console.log("Bot online....");
 })();
 
 // Плавная остановка бота
 process.once("SIGINT", async () => {
     bot.stop("SIGINT");
+    await gracefulShutdown();
 });
 process.once("SIGTERM", async () => {
     bot.stop("SIGTERM");
+    await gracefulShutdown();
 });
