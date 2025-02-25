@@ -43,10 +43,6 @@ composer.use(filter("balance-button", async (ctx) => {
 
             const balancesMaxLength = Math.max(...calculatedBalancesLengths);
 
-            const kassBalance = Object.values(balances).reduce((mainSum, balance) => {
-                return mainSum += balance;
-            }, 0);
-
             for (let i = 0; i < currencies.length; i += 2) {
                 if (i + 1 < currencies.length) {
                     if(mainText.length === 1)
