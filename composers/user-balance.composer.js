@@ -72,9 +72,6 @@ composer.use(filter("main-balance-button", async (ctx) => {
         if (kassBalance === 0) {
             mainText.splice(0, 1, `<b>${ctx.t("main-zero-balance")}`);
         } else {
-            mainText.push("\n");
-            mainText.push("—");
-
             users.forEach((user, userIndex) => {
                 const userText = [];
                 const userNamePadLength = Math.max(usersNameMaxLength + TELEGRAM_LETTER_LENGTH + 2,
@@ -92,13 +89,6 @@ composer.use(filter("main-balance-button", async (ctx) => {
 
                 mainText.push(userText.join("\n"));
             });
-
-            const maxLength = Math.max(...mainText.map((line) => line.length));
-            const divider = "—".repeat(maxLength / 4);
-            const indexOfDivider = mainText.findIndex((string) =>
-                string.includes("—")
-            );
-            mainText.splice(indexOfDivider, 1, divider);
         }
 
         mainText[mainText.length - 1] += "</b>";
