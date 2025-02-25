@@ -22,9 +22,13 @@ export const createTransactionsXLSX = async (transactions, users, period, projec
         ctx.t("name-header"),
         ctx.t("type-header"),
         ctx.t("amount-header"),
-        ctx.t("currency-header"),
-        ctx.t("hash-header")
+        ctx.t("currency-header")
     ];
+
+    const project = projects.find(p => p.id === transactions[0].project_id);
+
+    if(project.crypto_only)
+        baseTableHeader.push(ctx.t("hash-header"))
 
     let tableBody = [];
 
@@ -228,7 +232,8 @@ const fillWorksheetWithTransactions = (worksheet, tableHeader, period, nameStyle
         worksheet.cell(row, ++column).string(item.type).style(bodyStyle);
         worksheet.cell(row, ++column).number(item.amount).style(bodyWithoutFillStyle);
         worksheet.cell(row, ++column).string(item.currency).style(bodyWithoutFillStyle);
-        worksheet.cell(row, ++column).link(generateLinkForCryptoTransaction(item.crypto_type, item.hash), item.hash).style(bodyWithoutFillStyle);
+        if(tableHeader.find(h => h === ctx.t("hash-header")))
+            worksheet.cell(row, ++column).link(generateLinkForCryptoTransaction(item.crypto_type, item.hash), item.hash).style(bodyWithoutFillStyle);
 
         row++;
     });
@@ -241,5 +246,6 @@ const fillWorksheetWithTransactions = (worksheet, tableHeader, period, nameStyle
     worksheet.column(++column).setWidth(15);
     worksheet.column(++column).setWidth(12);
     worksheet.column(++column).setWidth(10);
-    worksheet.column(++column).setWidth(15);
+    if(tableHeader.find(h => h === ctx.t("hash-header")))
+        worksheet.column(++column).setWidth(15);
 };

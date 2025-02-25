@@ -20,9 +20,13 @@ export const createTransactionsPDF = async (transactions, users, period, project
         amount: ctx.t("amount-header"),
         currency: ctx.t("currency-header"),
         created: ctx.t("date-header"),
-        comment: ctx.t("comment-header"),
-        hash: ctx.t("hash-header")
+        comment: ctx.t("comment-header")
     }];
+
+    const project = projects.find(p => p.id === transactions[0].project_id);
+
+    if(project.crypto_only)
+        tableHeader[0].hash = (ctx.t("hash-header"))
 
     let tableBody = [];
 
@@ -33,16 +37,20 @@ export const createTransactionsPDF = async (transactions, users, period, project
         const user = users.find(u => u.id === transaction.user_id);
         const userName = user.name;
 
-        tableBody.push([
+        const transactionData = [
             transactionId,
             userName,
             getTransactionType(transaction.type, ctx),
             formatAmount(transaction.amount),
             transaction.currency,
             formatDate(date),
-            transaction.comment,
-            transaction.hash
-        ]);
+            transaction.comment
+        ];
+
+        if(project.crypto_only)
+            transactionData.push(transaction.hash);
+
+        tableBody.push(transactionData);
     }
 
     pdf.autoTable({
