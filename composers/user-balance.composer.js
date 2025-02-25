@@ -72,50 +72,34 @@ composer.use(filter("main-balance-button", async (ctx) => {
         if (kassBalance === 0) {
             mainText.splice(0, 1, `<b>${ctx.t("main-zero-balance")}`);
         } else {
+            mainText.push("\n");
+            mainText.push("—");
 
-            for (let i = 0; i < currencies.length; i += 2) {
-                if (i + 1 < currencies.length) {
-                    if(mainText.length === 1)
-                        mainText.push(`${getBalanceText(balances, -1, currencies[i])}\t${getBalanceText(balances, -1, currencies[i + 1])}`);
-                    else
-                        mainText.push(`${padTextIfNeeded(balancesMaxLength,
-                            getBalanceText(balances, -1, currencies[i]))}\t${getBalanceText(balances, -1, currencies[i + 1])}`);
+            users.forEach((user, userIndex) => {
+                const userText = [];
+                const userNamePadLength = Math.max(usersNameMaxLength + TELEGRAM_LETTER_LENGTH + 2,
+                    usersNameMaxLength + (usersNameMaxLength - user.name.length - 2) * TELEGRAM_LETTER_LENGTH);
+                const userNameText = `${user.name}: `.padEnd(userNamePadLength);
+                const balanceText = currencies.map(currency => getBalanceText(balances, userIndex, currency)).join("    ");
+
+                if (!balanceText.trim()) {
+                    userText.push(`${userNameText} ${ctx.t("main-zero-balance")}`);
                 } else {
-                    mainText.push(`${getBalanceText(balances, -1, currencies[i])}\n`);
+                    userText.push(`${userNameText} ${balanceText}`);
                 }
-            }
+
+                userText.splice(0, 0, " ");
+
+                mainText.push(userText.join("\n"));
+            });
+
+            const maxLength = Math.max(...mainText.map((line) => line.length));
+            const divider = "—".repeat(maxLength / 4);
+            const indexOfDivider = mainText.findIndex((string) =>
+                string.includes("—")
+            );
+            mainText.splice(indexOfDivider, 1, divider);
         }
-
-        mainText.push("\n");
-        mainText.push("—");
-
-        users.forEach((user, userIndex) => {
-            const userText = [];
-            const userNamePadLength = Math.max(usersNameMaxLength + TELEGRAM_LETTER_LENGTH + 2,
-                usersNameMaxLength + (usersNameMaxLength - user.name.length - 2) * TELEGRAM_LETTER_LENGTH);
-            const newLinePadLength = userNamePadLength * TELEGRAM_LETTER_LENGTH - 2;
-            const userNameText = `${user.name}: `.padEnd(userNamePadLength);
-            const balanceText = currencies.map(currency => getBalanceText(balances, userIndex, currency)).join("    ");
-
-            if (!balanceText.trim()) {
-                userText.push(`${userNameText} ${ctx.t("main-zero-balance")}`);
-            } else {
-                userText.push(
-                    `${userNameText} ${balanceText}`
-                );
-            }
-
-            userText.splice(0, 0, " ");
-
-            mainText.push(userText.join("\n"));
-        });
-
-        const maxLength = Math.max(...mainText.map((line) => line.length));
-        const divider = "—".repeat(maxLength / 4);
-        const indexOfDivider = mainText.findIndex((string) =>
-            string.includes("—")
-        );
-        mainText.splice(indexOfDivider, 1, divider);
 
         mainText[mainText.length - 1] += "</b>";
 

@@ -5,7 +5,7 @@ import {Scenes, session, Telegraf} from 'telegraf';
 // Дополнительные обработчики действий
 import actionsComposer from './composers/actions.composer.js';
 import balanceComposer from './composers/balance.composer.js';
-import mainBalanceComposer from "./composers/main-balance.composer.js";
+import userBalanceComposer from "./composers/user-balance.composer.js";
 import startComposer from './composers/start.composer.js';
 
 // Сцены
@@ -57,7 +57,7 @@ bot.use(async (ctx, next) => {
 });
 
 bot.use(balanceComposer);
-bot.use(mainBalanceComposer);
+bot.use(userBalanceComposer);
 bot.use(actionsComposer);
 bot.use(startComposer);
 
