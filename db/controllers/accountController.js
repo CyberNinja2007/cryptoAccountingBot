@@ -1,4 +1,4 @@
-import {get} from '../queries/accountQueries.js';
+import {get, getByUserId} from '../queries/accountQueries.js';
 import {Account} from '../models/Account.js';
 
 /**
@@ -20,7 +20,31 @@ export async function getAccount(telegramId) {
 
         return account;
     } catch (error) {
-        console.error(`Произошла ошибка при попытке получить аккаунт с telegram_id ${telegramId}`, error);
+        console.error(`Произошла ошибка при попытке получить аккаунт с telegram_id ${telegramId}:`, error);
         return null;
+    }
+}
+
+/**
+ * Получить аккаунт по идентификатору пользователя.
+ *
+ * @param {number} userId - Идентификатор пользователя.
+ * @returns {Promise<Account[]>} Список аккаунтов.
+ */
+export async function getAccountByUserId(userId) {
+    try {
+        const accounts = await getByUserId(userId);
+
+        if (!accounts) {
+            console.log(`Аккаунтов для пользователя с id ${userId} не существует`);
+            return [];
+        }
+
+        console.log(`Были получены все (${accounts.length}) аккаунты для пользователя ${userId}`);
+
+        return accounts;
+    } catch (error) {
+        console.error(`Произошла ошибка при попытке получить аккаунты для пользователя с id ${userId}:`, error);
+        return [];
     }
 }
