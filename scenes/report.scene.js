@@ -52,10 +52,11 @@ reportScene.action(
             ctx.wizard.state.period = ctx.match.input;
             ctx.wizard.state.year = (new Date()).getFullYear();
             ctx.wizard.state.next_year = ctx.wizard.state.year;
+            const isPdfNeeded = !ctx.session.project.full_report_only;
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true, true)
+                downloadFilterOptionKeyboard(ctx, true, true, isPdfNeeded)
             );
 
             await ctx.answerCbQuery('');
@@ -115,10 +116,11 @@ reportScene.action(/^[0-9]* число$/i, async (ctx) => {
         const pickedDay = +ctx.match.input.split(" ")[0];
         if (typeof ctx.wizard.state.startDay === "number") {
             ctx.wizard.state.endDay = pickedDay;
+            const isPdfNeeded = !ctx.session.project.full_report_only;
 
             await ctx.editMessageText(
                 ctx.t("input-report-type"),
-                downloadFilterOptionKeyboard(ctx, true, true)
+                downloadFilterOptionKeyboard(ctx, true, true, isPdfNeeded)
             );
         } else {
             ctx.wizard.state.startDay = pickedDay;
@@ -184,13 +186,14 @@ reportScene.action(/^type_[a-z]+$/i, async (ctx) => {
         ctx.wizard.state.type_filter = type;
         const user = ctx.wizard.state.user_filter || {name: ""}
         const isUserFilterNeeded = !ctx.wizard.state.user_filter;
+        const isPdfNeeded = !ctx.session.project.full_report_only;
 
         await ctx.editMessageText(
             ctx.t("input-report-type-with-filter", {
                 type: TRANSACTION_TYPES[type],
                 user: user.name
             }),
-            downloadFilterOptionKeyboard(ctx,  false, isUserFilterNeeded)
+            downloadFilterOptionKeyboard(ctx,  false, isUserFilterNeeded, isPdfNeeded)
         );
 
         await ctx.answerCbQuery('');
@@ -243,13 +246,14 @@ reportScene.action(/^user#[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
         ctx.wizard.state.user_filter = user;
         const type = ctx.wizard.state.type_filter || "";
         const typeFilterNeeded = !ctx.wizard.state.type_filter;
+        const isPdfNeeded = !ctx.session.project.full_report_only;
 
         await ctx.editMessageText(
             ctx.t("input-report-type-with-filter", {
                 type: type === "" ? type : TRANSACTION_TYPES[type],
                 user: user.name
             }),
-            downloadFilterOptionKeyboard(ctx,  typeFilterNeeded, false)
+            downloadFilterOptionKeyboard(ctx,  typeFilterNeeded, false, isPdfNeeded)
         );
 
         await ctx.answerCbQuery('');
