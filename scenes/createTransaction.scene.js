@@ -24,7 +24,7 @@ import {generateLinkForCryptoTransaction} from "../utils/cryptoTransactionsManag
 import {currenciesDictionary} from "../utils/currenciesDictionary.js";
 import {transactionCategories} from "../utils/transactionCategories.js";
 
-const COMMISSION_AMOUNT = 6;
+const COMMISSION_AMOUNT = 5;
 
 const createTransactionScene = new Scenes.WizardScene(
     "createTransactionScene",
